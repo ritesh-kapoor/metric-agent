@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<configuration
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://www.metricsagent.com/schema/configuration"
+        xsi:schemaLocation="http://www.metricsagent.com/schema/configuration configuration.xsd">
+
+
+    <reporting>
+        <!-- <graphite>
+             <url>localhost</url>
+             <port>1000</port>
+             <period>1000</period>
+         </graphite>-->
+        <jmx/>
+        <console>
+            <period>5000</period>
+        </console>
+    </reporting>
+
+    <metrics>
+        <timer name="timer" package="test.*" methodRegex="test.InstrumentationTest\.timerTest.*"/>
+
+    </metrics>
+</configuration>
