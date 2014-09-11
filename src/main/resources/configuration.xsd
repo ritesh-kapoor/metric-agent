@@ -6,9 +6,11 @@
 
     <xs:complexType name="graphite">
         <xs:sequence>
+            <xs:element name="name" type="xs:string" />
             <xs:element name="url" type="xs:string"/>
             <xs:element name="port" type="xs:nonNegativeInteger"/>
             <xs:element name="period" type="xs:nonNegativeInteger" default="5000"/>
+            <xs:element name="batchSize" type="xs:nonNegativeInteger" default="50"/>
         </xs:sequence>
     </xs:complexType>
 

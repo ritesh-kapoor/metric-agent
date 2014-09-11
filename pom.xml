@@ -56,6 +56,26 @@
                 <artifactId>maven-release-plugin</artifactId>
                 <version>2.5</version>
             </plugin>
+
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <configuration>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                    <archive>
+                        <index>true</index>
+                        <manifest>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                        </manifest>
+                        <manifestEntries>
+                            <Premain-Class>org.metricagent.agent.MetricAgent</Premain-Class>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
+
         </plugins>
 
         <resources>
@@ -89,12 +109,18 @@
             <version>1.7.7</version>
         </dependency>
 
-      <!--  <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
-            <version>1.2.17</version>
+        <dependency>
+            <groupId>com.brightcove.metrics</groupId>
+            <artifactId>metrics-graphite-pickle</artifactId>
+            <version>1.2.0</version>
         </dependency>
--->
+
+        <!--  <dependency>
+              <groupId>log4j</groupId>
+              <artifactId>log4j</artifactId>
+              <version>1.2.17</version>
+          </dependency>
+  -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
@@ -122,7 +148,7 @@
 
         <dependency>
             <groupId>com.yammer.metrics</groupId>
-            <artifactId> metrics-graphite</artifactId>
+            <artifactId>metrics-graphite</artifactId>
             <version>2.2.0</version>
         </dependency>
 

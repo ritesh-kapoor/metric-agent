@@ -38,20 +38,28 @@ public class MetricAgent implements ClassFileTransformer {
                                Instrumentation instrumentation) {
 
         //BasicConfigurator.configure();
-        log.debug("Starting Metric Agent");
+        log.info("Starting Metric Agent");
         configuration = ConfigurationManager.getInstance().loadFromFile(CONFIGURATION_FILENAME);
+
+        log.info("Configuration : " + configuration.getReporting());
 
         if (configuration.getReporting().getGraphite() != null) {
             Graphite graphite = configuration.getReporting().getGraphite();
-            MetricManager.getInstance().initializeGraphiteReporter(graphite.getUrl(), graphite.getPort().intValue()
-                    , graphite.getPeriod().intValue());
+            MetricManager.getInstance().initializeGraphiteReporter(graphite.getName(), graphite.getUrl(), graphite.getPort().intValue()
+                    , graphite.getPeriod().intValue(), graphite.getBatchSize().intValue());
+            log.info("Reporting via Graphite; name : {}, URL :{} , port :{} , period : {}, batchSize: {}",
+                    graphite.getName(), graphite.getUrl(), graphite.getPort().intValue(),
+                    graphite.getPeriod().intValue(), graphite.getBatchSize());
         } else if (configuration.getReporting().getCsv() != null) {
             Csv csv = (Csv) configuration.getReporting().getCsv();
+            log.info("Reporting via Csv path :{} period :{}", csv.getPath(), csv.getPeriod().intValue());
             MetricManager.getInstance().initializeCsvReporter(csv.getPath(), csv.getPeriod().intValue());
         } else if (configuration.getReporting().getConsole() != null) {
             MetricManager.getInstance().initializeConsoleReporter(configuration.getReporting()
                     .getConsole().getPeriod().intValue());
+            log.info("Reporting via Console");
         } else if (configuration.getReporting().getJmx() != null) {
+            log.info("Reporting via JMX");
             MetricManager.getInstance().initializeJmxRerporter();
         }
 
@@ -107,7 +115,10 @@ public class MetricAgent implements ClassFileTransformer {
                 for (CtMethod ctMethod : ctClass.getDeclaredMethods()) {
                     //String signature= Modifier.toString(ctMethod.getModifiers())+" "+ctMethod.getLongName();
                     String signature = ctMethod.getLongName();
-                    if (!signature.matches(metric.getMethodRegex())) continue;
+                    if (!signature.matches(metric.getMethodRegex())) {
+                        log.info("Not weaving method {}", signature);
+                        continue;
+                    }
                     try {
                         if (metric instanceof Meter) {
                             MetricManager.getInstance().instrumentForMeter(metric.getName(),

@@ -15,6 +15,7 @@
  */
 package org.metricagent.agent;
 
+import com.brightcove.metrics.reporting.GraphitePickleReporter;
 import com.yammer.metrics.Metrics;
 import com.yammer.metrics.core.Meter;
 import com.yammer.metrics.core.Metric;
@@ -22,7 +23,6 @@ import com.yammer.metrics.core.Timer;
 import com.yammer.metrics.core.TimerContext;
 import com.yammer.metrics.reporting.ConsoleReporter;
 import com.yammer.metrics.reporting.CsvReporter;
-import com.yammer.metrics.reporting.GraphiteReporter;
 import com.yammer.metrics.reporting.JmxReporter;
 import javassist.*;
 import org.metricagent.metrics.MetricType;
@@ -52,8 +52,10 @@ public class MetricManager {
         CsvReporter.enable(new File(directory), period, TimeUnit.MILLISECONDS);
     }
 
-    public void initializeGraphiteReporter(String host, int port, long period) {
-        GraphiteReporter.enable(period, TimeUnit.MILLISECONDS, host, port);
+    public void initializeGraphiteReporter(String name, String host, int port, long period, int batchSize) {
+        //GraphiteReporter.enable(period, TimeUnit.MILLISECONDS, host, port);
+        GraphitePickleReporter.enable(Metrics.defaultRegistry(), period, TimeUnit.MILLISECONDS, host, port, name,
+                batchSize);
     }
 
     public void initializeJmxRerporter() {
