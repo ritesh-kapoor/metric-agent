@@ -159,4 +159,13 @@ public class Reporting {
         this.console = value;
     }
 
+    @Override
+    public String toString() {
+        return "Reporting{" +
+                "graphite=" + graphite +
+                ", csv=" + csv +
+                ", jmx=" + (jmx!=null) +
+                ", console=" + console +
+                '}';
+    }
 }

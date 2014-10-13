@@ -21,17 +21,17 @@ import javassist.CtMethod;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.metricagent.configuration.ConfigurationManager;
 import org.metricagent.configuration.marshal.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.lang.instrument.Instrumentation;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.security.ProtectionDomain;
 
 public class MetricAgent implements ClassFileTransformer {
     private static final String CONFIGURATION_FILENAME = "configuration.xml";
-    private static Logger log = LoggerFactory.getLogger(MetricAgent.class);
+    private static Log log = Log.getLogger(MetricAgent.class);
     private static Configuration configuration;
 
     public static void premain(String agentArgument,
@@ -47,12 +47,12 @@ public class MetricAgent implements ClassFileTransformer {
             Graphite graphite = configuration.getReporting().getGraphite();
             MetricManager.getInstance().initializeGraphiteReporter(graphite.getName(), graphite.getUrl(), graphite.getPort().intValue()
                     , graphite.getPeriod().intValue(), graphite.getBatchSize().intValue());
-            log.info("Reporting via Graphite; name : {}, URL :{} , port :{} , period : {}, batchSize: {}",
+            log.info("Reporting via Graphite; name : {0}, URL :{1} , port :{2} , period : {3}, batchSize: {4}",
                     graphite.getName(), graphite.getUrl(), graphite.getPort().intValue(),
-                    graphite.getPeriod().intValue(), graphite.getBatchSize());
+                    graphite.getPeriod().intValue(), graphite.getBatchSize().intValue());
         } else if (configuration.getReporting().getCsv() != null) {
             Csv csv = (Csv) configuration.getReporting().getCsv();
-            log.info("Reporting via Csv path :{} period :{}", csv.getPath(), csv.getPeriod().intValue());
+            log.info("Reporting via Csv path :{0} period :{1}", csv.getPath(), csv.getPeriod().intValue());
             MetricManager.getInstance().initializeCsvReporter(csv.getPath(), csv.getPeriod().intValue());
         } else if (configuration.getReporting().getConsole() != null) {
             MetricManager.getInstance().initializeConsoleReporter(configuration.getReporting()
@@ -73,9 +73,9 @@ public class MetricAgent implements ClassFileTransformer {
                             byte[] classfileBuffer) throws IllegalClassFormatException {
 
         className = className.replace("/", ".");
-        if (aClass != null) log.debug("Class redefined {}", className);
+        if (aClass != null) log.info("Class redefined {0}", className);
 
-        log.debug("Loading class {}", className);
+        //log.info("Loading class {0}", className);
 
         boolean doInstrument = false;
         for (Metric metric : configuration.getMetrics().getMeterOrTimer()) {
@@ -86,25 +86,40 @@ public class MetricAgent implements ClassFileTransformer {
         }
 
         if (doInstrument) {
-            log.info("Weaving class {}", className);
+            log.info("Weaving class {0}", className);
         } else {
-            log.debug("Not weaving class {}", className);
+            //log.info("Not weaving class {0}", className);
             return classfileBuffer;
         }
 
         ClassPool classPool = new ClassPool();
         classPool.appendSystemPath();
+
+        try{
+            if(classLoader instanceof URLClassLoader) {
+                log.info("Attempting to load URL class loader.");
+                URLClassLoader urlClassLoader = (URLClassLoader) classLoader;
+                for (URL url : urlClassLoader.getURLs()) {
+                    log.info("Adding class path {0}",url.getPath());
+                    classPool.appendClassPath(url.getPath());
+                }
+            }
+        }catch (Exception e){
+            log.info("Unable to load class path. Exception : {0}", ExceptionUtils.getStackTrace(e));
+        }
+
+
         CtClass ctClass = null;
         try {
             ctClass = classPool.get(className);
             if (ctClass.isFrozen()) {
-                log.debug("Skip class {}: is frozen", className);
+                log.info("Skip class {0}: is frozen", className);
                 return null;
             }
 
             if (ctClass.isPrimitive() || ctClass.isArray() || ctClass.isAnnotation()
                     || ctClass.isEnum() || ctClass.isInterface()) {
-                log.debug("Skip class {}: not a class", className);
+                log.info("Skip class {0}: not a class", className);
                 return null;
             }
 
@@ -116,7 +131,7 @@ public class MetricAgent implements ClassFileTransformer {
                     //String signature= Modifier.toString(ctMethod.getModifiers())+" "+ctMethod.getLongName();
                     String signature = ctMethod.getLongName();
                     if (!signature.matches(metric.getMethodRegex())) {
-                        log.info("Not weaving method {}", signature);
+                        log.info("Not weaving method {0}", signature);
                         continue;
                     }
                     try {
@@ -128,18 +143,18 @@ public class MetricAgent implements ClassFileTransformer {
                         }
                         isClassModified = true;
                     } catch (Exception e) {
-                        log.info("Skipping instrumentation of methods for class {} exception {}", ctClass.getName(),
+                        log.info("Skipping instrumentation of methods for class {0} exception {1}", ctClass.getName(),
                                 ExceptionUtils.getStackTrace(e));
                     }
                 }
             }
 
             if (isClassModified) {
-                log.info("Completed weaving class {}", className);
+                log.info("Completed weaving class {0}", className);
                 return ctClass.toBytecode();
             }
         } catch (Exception e) {
-            log.info("Exception occurred while weaving class {} with Exception : {} ",
+            log.info("Exception occurred while weaving class {0} with Exception : {1} ",
                     className, ExceptionUtils.getStackTrace(e));
         }
 

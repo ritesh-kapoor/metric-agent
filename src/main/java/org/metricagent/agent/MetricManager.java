@@ -26,8 +26,6 @@ import com.yammer.metrics.reporting.CsvReporter;
 import com.yammer.metrics.reporting.JmxReporter;
 import javassist.*;
 import org.metricagent.metrics.MetricType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.Map;
@@ -37,7 +35,7 @@ import java.util.concurrent.TimeUnit;
 public class MetricManager {
 
     public static MetricManager metricManager = new MetricManager();
-    private static Logger log = LoggerFactory.getLogger(MetricAgent.class);
+    private static Log log = Log.getLogger(MetricAgent.class);
     private Map<String, Metric> metricMap = new ConcurrentHashMap();
 
     public static MetricManager getInstance() {
@@ -79,20 +77,20 @@ public class MetricManager {
 
 
     public void instrumentForMeter(String name, boolean before, CtClass clazz, CtMethod method) throws CannotCompileException {
-        log.info("Instrumenting class {} method {} with {} metric", clazz.getName(),
+        log.info("Instrumenting class {0} method {1} with {2} metric", clazz.getName(),
                 method.getLongName(), MetricType.METER.name());
         if (before) {
             method.insertBefore(String.format("%s.getInstance().getMeter(\"%s\").mark();", MetricManager.class.getName(), name));
         } else {
             method.insertAfter(String.format("%s.getInstance().getMeter(\"%s\").mark();", MetricManager.class.getName(), name));
         }
-        log.info("Instrumention completed for method {} with {} metric {}", method.getName(), MetricType.METER.name(), name);
+        log.info("Instrumention completed for method {0} with {1} metric {2}", method.getName(), MetricType.METER.name(), name);
 
     }
 
     public void instrumentForTimer(String name, CtClass clazz, CtMethod method) throws CannotCompileException {
         MetricType metricType = MetricType.TIMER;
-        log.info("Instrumenting class {} method {} with {} metric", clazz.getName(),
+        log.info("Instrumenting class {0} method {1} with {2} metric", clazz.getName(),
                 method.getLongName(), metricType.name());
         try {
             method.addLocalVariable("$timerContext", ClassPool.getDefault().get(TimerContext.class.getName()));
@@ -103,7 +101,7 @@ public class MetricManager {
                 String.format("$timerContext=%s.getInstance().getTimer(\"%s\").time();", MetricManager.class.getName(), name)
         );
         method.insertAfter(String.format("$timerContext.stop();", name));
-        log.info("Instrumention completed for method {} with {} metric {}", method.getName(), metricType.name(), name);
+        log.info("Instrumention completed for method {0} with {1} metric {2}", method.getName(), metricType.name(), name);
     }
 
 }
