@@ -193,4 +193,15 @@ public class Graphite {
         this.batchSize = value;
     }
 
+    @Override
+    public String toString() {
+        final StringBuffer sb = new StringBuffer("Graphite{");
+        sb.append("name='").append(name).append('\'');
+        sb.append(", url='").append(url).append('\'');
+        sb.append(", port=").append(port);
+        sb.append(", period=").append(period);
+        sb.append(", batchSize=").append(batchSize);
+        sb.append('}');
+        return sb.toString();
+    }
 }

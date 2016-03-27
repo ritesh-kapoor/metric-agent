@@ -10,6 +10,7 @@ import java.util.Date;
 public class Log {
     Class aClass;
     public static PrintWriter writer = new PrintWriter(System.out);
+    private static boolean isVerbose = false;
 
     private Log(Class aClass) {
         this.aClass = aClass;
@@ -17,6 +18,10 @@ public class Log {
 
     public static Log getLogger(Class aClass) {
         return new Log(aClass);
+    }
+
+    public static void enableVerbose() {
+        isVerbose = true;
     }
 
     public static void info(String s, Object a1, Object a2, Object a3, Object a4, Object a5) {
@@ -41,6 +46,43 @@ public class Log {
 
     public static void info(String s) {
         print(s, null);
+    }
+
+
+    public static void debug(String s, Object a1, Object a2, Object a3, Object a4, Object a5) {
+        if (isVerbose) {
+            print(s, new Object[]{a1, a2, a3, a4, a5});
+        }
+    }
+
+    public static void debug(String s, Object a1, Object a2, Object a3, Object a4) {
+        if (isVerbose) {
+            print(s, new Object[]{a1, a2, a3, a4});
+        }
+    }
+
+    public static void debug(String s, Object a1, Object a2, Object a3) {
+        if (isVerbose) {
+            print(s, new Object[]{a1, a2, a3});
+        }
+    }
+
+    public static void debug(String s, Object a1, Object a2) {
+        if (isVerbose) {
+            print(s, new Object[]{a1, a2});
+        }
+    }
+
+    public static void debug(String s, Object a1) {
+        if (isVerbose) {
+            print(s, new Object[]{a1});
+        }
+    }
+
+    public static void debug(String s) {
+        if (isVerbose) {
+            print(s, null);
+        }
     }
 
     public static void print(String s, Object[] args) {

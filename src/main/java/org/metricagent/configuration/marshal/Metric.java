@@ -96,7 +96,7 @@ public class Metric {
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     @Generated(value = "com.sun.tools.xjc.Driver", date = "2014-09-11T05:25:30+05:30", comments = "JAXB RI v2.2.7")
     public void setPackage(String value) {
@@ -129,4 +129,13 @@ public class Metric {
         this.methodRegex = value;
     }
 
+    @Override
+    public String toString() {
+        final StringBuffer sb = new StringBuffer("Metric{");
+        sb.append("name='").append(name).append('\'');
+        sb.append(", _package='").append(_package).append('\'');
+        sb.append(", methodRegex='").append(methodRegex).append('\'');
+        sb.append('}');
+        return sb.toString();
+    }
 }

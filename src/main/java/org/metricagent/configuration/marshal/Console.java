@@ -67,4 +67,10 @@ public class Console {
         this.period = value;
     }
 
+    @Override
+    public String toString() {
+        return "Console{" +
+                "period=" + period +
+                '}';
+    }
 }
